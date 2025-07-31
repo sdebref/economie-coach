@@ -62,9 +62,9 @@ if "pdf_text" in st.session_state:
 
     # ⬅️ 2. Vragen pas genereren bij klik
     if st.button("🎲 Genereer GPT-oefenvragen"):
-    st.session_state.vragen = genereer_gpt_vragen(st.session_state.pdf_text)
-    st.session_state.antwoorden = [None] * len(st.session_state.vragen)
-    st.session_state.gecontroleerd = [False] * len(st.session_state.vragen)
+        st.session_state.vragen = genereer_gpt_vragen(st.session_state.pdf_text)
+        st.session_state.antwoorden = [None] * len(st.session_state.vragen)
+        st.session_state.gecontroleerd = [False] * len(st.session_state.vragen)
 
 if "vragen" in st.session_state:
     st.header("📝 Oefenvragen")
