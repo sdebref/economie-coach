@@ -71,15 +71,15 @@ if "vragen" in st.session_state:
 
     score = 0
     for idx, vraag in enumerate(st.session_state.vragen):
-    st.subheader(f"Vraag {idx+1}")
-    opties = vraag["opties"]
-    juist_idx = vraag["correcte_index"]
-    st.session_state.antwoorden[idx] = st.radio(
-        vraag["vraag"],
-        opties,
-        index=None,
-        key=f"vraag_{idx}"
-    )
+        st.subheader(f"Vraag {idx+1}")
+        opties = vraag["opties"]
+        juist_idx = vraag["correcte_index"]
+        st.session_state.antwoorden[idx] = st.radio(
+            vraag["vraag"],
+            opties,
+            index=None,
+            key=f"vraag_{idx}"
+        )
     
         if st.button(f"Controleer vraag {idx+1}", key=f"knop_{idx}"):
             st.session_state.gecontroleerd[idx] = True
