@@ -14,40 +14,62 @@ def extract_text_from_pdf(uploaded_file):
     all_text = ""
     with pdfplumber.open(uploaded_file) as pdf:
         for page in pdf.pages:
-            all_text += page.extract_text() + "\n"
+            text = page.extract_text()
+            if text:
+                all_text += text + "\n"
     return all_text
 
 st.set_page_config(page_title="Economie Coach voor Téné", layout="wide")
 st.title("📘 AI Studiecoach Economie – Derde Middelbaar")
 
+# ⬅️ 1. Upload PDF en sla tekst op in session_state
 st.sidebar.header("📂 Upload werkboek")
-uploaded_file = st.sidebar.file_uploader("Upload hier een PDF van een thema", type="pdf")
+uploaded_file = st.sidebar.file_uploader("Upload een PDF van een thema", type="pdf")
 
-if uploaded_file:
+if uploaded_file and "pdf_text" not in st.session_state:
     with st.spinner("PDF wordt ingelezen..."):
-        volledige_tekst = extract_text_from_pdf(uploaded_file)
+        st.session_state.pdf_text = extract_text_from_pdf(uploaded_file)
 
+if "pdf_text" in st.session_state:
     thema_lijst = ["Thema 1: Consument & Producent", "Thema 2: Werking van een onderneming",
                    "Thema 3: Boekhoudkundig beheer", "Thema 4: Personeelsbeheer", "Thema 5: Logistiek & Transport"]
 
     st.sidebar.markdown("### 📚 Kies een thema")
     gekozen_thema = st.sidebar.selectbox("Kies een thema om oefeningen te maken:", thema_lijst)
 
-    st.header(f"📝 Oefeningen bij {gekozen_thema}")
-    vragen = genereer_vragen(volledige_tekst)
+    # ⬅️ 2. Vragen pas genereren bij klik
+    if st.button("🎲 Genereer oefenvragen"):
+        st.session_state.vragen = genereer_vragen(st.session_state.pdf_text)
+        st.session_state.antwoorden = [None] * len(st.session_state.vragen)
+        st.session_state.gecontroleerd = [False] * len(st.session_state.vragen)
+
+if "vragen" in st.session_state:
+    st.header("📝 Oefenvragen")
 
     score = 0
-    for idx, (vraag, opties, juist_idx) in enumerate(vragen):
+    for idx, (vraag, opties, juist_idx) in enumerate(st.session_state.vragen):
         st.subheader(f"Vraag {idx+1}")
-        keuze = st.radio(vraag, opties, key=f"vraag_{idx}")
+        st.session_state.antwoorden[idx] = st.radio(
+            vraag,
+            opties,
+            index=None,
+            key=f"vraag_{idx}"
+        )
+
         if st.button(f"Controleer vraag {idx+1}", key=f"knop_{idx}"):
-            if opties.index(keuze) == juist_idx:
+            st.session_state.gecontroleerd[idx] = True
+
+        if st.session_state.gecontroleerd[idx]:
+            keuze = st.session_state.antwoorden[idx]
+            if keuze is None:
+                st.warning("⚠️ Kies een antwoord.")
+            elif opties.index(keuze) == juist_idx:
                 st.success("✅ Juist!")
                 score += 1
             else:
                 st.error(f"❌ Fout. Correct antwoord: {opties[juist_idx]}")
 
     st.markdown("---")
-    st.markdown(f"### 🎯 Eindscore: {score} op {len(vragen)}")
+    st.markdown(f"### 🎯 Eindscore: {score} op {len(st.session_state.vragen)}")
 else:
-    st.info("👉 Upload een werkboek-PDF in de zijbalk om te beginnen.")
+    st.info("👉 Kies een thema en klik op 'Genereer oefenvragen'.")
