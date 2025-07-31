@@ -4,30 +4,29 @@ import random
 import openai
 
 def genereer_gpt_vragen(tekst, aantal=3):
-    openai.api_key = st.secrets["OPENAI_API_KEY"]
-    
+    client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
     prompt = f"""
-Je bent een onderwijshulp voor een 14-jarige leerling met dyslexie. Op basis van de onderstaande economische tekst uit het derde middelbaar, genereer je {aantal} meerkeuzevragen met telkens 4 antwoordopties. Geef telkens ook het juiste antwoord aan. De stijl moet duidelijk, kort en Nederlandstalig zijn.
+Je bent een onderwijshulp voor een 14-jarige leerling met dyslexie. Op basis van onderstaande economische tekst uit het derde middelbaar, genereer je {aantal} meerkeuzevragen met telkens 4 antwoordopties. Geef telkens ook het juiste antwoord aan. De stijl moet duidelijk, kort en Nederlandstalig zijn.
 
 TEKST:
 \"\"\"
-{tekst[:3000]}  # max input beperken
+{tekst[:3000]}
 \"\"\"
 
-Formatteer je antwoord als JSON-lijst met:
+Formatteer je output als een JSON-lijst met:
 - "vraag"
-- "opties" (lijst met 4 antwoorden)
-- "correcte_index" (0–3)
-
-Output:
+- "opties" (lijst van 4 antwoordmogelijkheden)
+- "correcte_index" (getal van 0–3)
 """
+
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
+            temperature=0.7
         )
-        raw_output = response['choices'][0]['message']['content']
+        raw_output = response.choices[0].message.content
         return eval(raw_output)
     except Exception as e:
         st.error(f"Fout bij ophalen van GPT-vragen: {e}")
