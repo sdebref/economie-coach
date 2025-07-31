@@ -4,7 +4,7 @@ import random
 import openai
 
 def genereer_gpt_vragen(tekst, aantal=3):
-    openai.api_key = st.secrets["OPENAI_API_KEY"]
+    openai.api_key = st.secrets["openai_api_key"]
     
     prompt = f"""
 Je bent een onderwijshulp voor een 14-jarige leerling met dyslexie. Op basis van de onderstaande economische tekst uit het derde middelbaar, genereer je {aantal} meerkeuzevragen met telkens 4 antwoordopties. Geef telkens ook het juiste antwoord aan. De stijl moet duidelijk, kort en Nederlandstalig zijn.
