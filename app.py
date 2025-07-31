@@ -1,14 +1,37 @@
 import streamlit as st
 import pdfplumber
 import random
+import openai
 
-def genereer_vragen(tekst, aantal=3):
-    voorbeeld_vragen = [
-        ("Wat betekent het begrip 'toegevoegde waarde'?", ["De winst", "De extra waarde in een proces", "BTW", "De kostprijs"], 1),
-        ("Welke sector hoort bij logistiek?", ["Ziekenhuizen", "Bouw", "Transport", "Reclame"], 2),
-        ("Wat is het doel van marketing?", ["Productie verhogen", "Meer winst boeken", "Werknemers belonen", "De verkoop stimuleren"], 3)
-    ]
-    return random.sample(voorbeeld_vragen, min(aantal, len(voorbeeld_vragen)))
+def genereer_gpt_vragen(tekst, aantal=3):
+    openai.api_key = st.secrets["OPENAI"]
+    
+    prompt = f"""
+Je bent een onderwijshulp voor een 14-jarige leerling met dyslexie. Op basis van de onderstaande economische tekst uit het derde middelbaar, genereer je {aantal} meerkeuzevragen met telkens 4 antwoordopties. Geef telkens ook het juiste antwoord aan. De stijl moet duidelijk, kort en Nederlandstalig zijn.
+
+TEKST:
+\"\"\"
+{tekst[:3000]}  # max input beperken
+\"\"\"
+
+Formatteer je antwoord als JSON-lijst met:
+- "vraag"
+- "opties" (lijst met 4 antwoorden)
+- "correcte_index" (0–3)
+
+Output:
+"""
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+        )
+        raw_output = response['choices'][0]['message']['content']
+        return eval(raw_output)
+    except Exception as e:
+        st.error(f"Fout bij ophalen van GPT-vragen: {e}")
+        return []
 
 def extract_text_from_pdf(uploaded_file):
     all_text = ""
@@ -38,24 +61,26 @@ if "pdf_text" in st.session_state:
     gekozen_thema = st.sidebar.selectbox("Kies een thema om oefeningen te maken:", thema_lijst)
 
     # ⬅️ 2. Vragen pas genereren bij klik
-    if st.button("🎲 Genereer oefenvragen"):
-        st.session_state.vragen = genereer_vragen(st.session_state.pdf_text)
-        st.session_state.antwoorden = [None] * len(st.session_state.vragen)
-        st.session_state.gecontroleerd = [False] * len(st.session_state.vragen)
+    if st.button("🎲 Genereer GPT-oefenvragen"):
+    st.session_state.vragen = genereer_gpt_vragen(st.session_state.pdf_text)
+    st.session_state.antwoorden = [None] * len(st.session_state.vragen)
+    st.session_state.gecontroleerd = [False] * len(st.session_state.vragen)
 
 if "vragen" in st.session_state:
     st.header("📝 Oefenvragen")
 
     score = 0
-    for idx, (vraag, opties, juist_idx) in enumerate(st.session_state.vragen):
-        st.subheader(f"Vraag {idx+1}")
-        st.session_state.antwoorden[idx] = st.radio(
-            vraag,
-            opties,
-            index=None,
-            key=f"vraag_{idx}"
-        )
-
+    for idx, vraag in enumerate(st.session_state.vragen):
+    st.subheader(f"Vraag {idx+1}")
+    opties = vraag["opties"]
+    juist_idx = vraag["correcte_index"]
+    st.session_state.antwoorden[idx] = st.radio(
+        vraag["vraag"],
+        opties,
+        index=None,
+        key=f"vraag_{idx}"
+    )
+    
         if st.button(f"Controleer vraag {idx+1}", key=f"knop_{idx}"):
             st.session_state.gecontroleerd[idx] = True
 
