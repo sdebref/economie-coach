@@ -67,7 +67,7 @@ if st.sidebar.button("📂 Thema laden"):
 
 if "volledige_tekst" in st.session_state:
     if st.button("🎲 Genereer GPT-oefenvragen"):
-        st.session_state.vragen = genereer_gpt_vragen(volledige_tekst)
+        st.session_state.vragen = genereer_gpt_vragen(st.session_state.volledige_tekst)
         st.session_state.antwoorden = [None] * len(st.session_state.vragen)
         st.session_state.gecontroleerd = [False] * len(st.session_state.vragen)
 
