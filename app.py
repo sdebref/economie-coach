@@ -57,13 +57,19 @@ pdf_map = {
 st.sidebar.header("📚 Kies een thema")
 gekozen_thema = st.sidebar.selectbox("Kies een thema:", list(pdf_map.keys()))
 
-pdf_path = Path(pdf_map[gekozen_thema])
-volledige_tekst = extract_text_from_pdf(pdf_path)
+volledige_tekst = None
 
-if st.button("🎲 Genereer GPT-oefenvragen"):
-    st.session_state.vragen = genereer_gpt_vragen(volledige_tekst)
-    st.session_state.antwoorden = [None] * len(st.session_state.vragen)
-    st.session_state.gecontroleerd = [False] * len(st.session_state.vragen)
+if st.sidebar.button("📂 Thema laden"):
+    pdf_path = Path(pdf_map[gekozen_thema])
+    with st.spinner("PDF wordt ingelezen..."):
+        volledige_tekst = extract_text_from_pdf(pdf_path)
+        st.session_state.volledige_tekst = volledige_tekst
+
+if "volledige_tekst" in st.session_state:
+    if st.button("🎲 Genereer GPT-oefenvragen"):
+        st.session_state.vragen = genereer_gpt_vragen(volledige_tekst)
+        st.session_state.antwoorden = [None] * len(st.session_state.vragen)
+        st.session_state.gecontroleerd = [False] * len(st.session_state.vragen)
 
 if "vragen" in st.session_state:
     st.header("📝 Oefenvragen")
