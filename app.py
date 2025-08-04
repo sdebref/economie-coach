@@ -30,17 +30,17 @@ Formatteer je output als een JSON-lijst met:
 - "correcte_index" (getal van 0–3)
 """
 
-try:
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7
-    )
-    raw_output = response.choices[0].message.content
-    return eval(raw_output)
-except Exception as e:
-    st.error(f"Fout bij ophalen van GPT-vragen: {e}")
-    return []
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7
+        )
+        raw_output = response.choices[0].message.content
+        return eval(raw_output)
+    except Exception as e:
+        st.error(f"Fout bij ophalen van GPT-vragen: {e}")
+        return []
 
 st.set_page_config(page_title="Economie Coach voor Téné", layout="wide")
 st.title("📘 AI Studiecoach Economie – Derde Middelbaar")
