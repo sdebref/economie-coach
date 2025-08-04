@@ -32,9 +32,9 @@ Formatteer je output als een JSON-lijst met:
 
 try:
     response = client.chat.completions.create(
-    model="gpt-4",
-    messages=[{"role": "user", "content": prompt}],
-    temperature=0.7
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7
     )
     raw_output = response.choices[0].message.content
     return eval(raw_output)
