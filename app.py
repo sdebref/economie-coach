@@ -20,9 +20,9 @@ def genereer_gpt_vragen(tekst, aantal=3):
 Je bent een onderwijshulp voor een 14-jarige leerling met dyslexie. Op basis van onderstaande economische tekst uit het derde middelbaar, genereer je {aantal} meerkeuzevragen met telkens 4 antwoordopties. Geef telkens ook het juiste antwoord aan. De stijl moet duidelijk, kort en Nederlandstalig zijn.
 
 TEKST:
-"""
+\"\"\"
 {tekst[:3000]}
-"""
+\"\"\"
 
 Formatteer je output als een JSON-lijst met:
 - "vraag"
@@ -41,7 +41,7 @@ Formatteer je output als een JSON-lijst met:
     except Exception as e:
         st.error(f"Fout bij ophalen van GPT-vragen: {e}")
         return []
-
+        
 st.set_page_config(page_title="Economie Coach voor Téné", layout="wide")
 st.title("📘 AI Studiecoach Economie – Derde Middelbaar")
 
